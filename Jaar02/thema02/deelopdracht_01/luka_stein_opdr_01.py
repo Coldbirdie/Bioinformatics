@@ -35,27 +35,8 @@ class Tentamen:
         :return: fstring of exam information
         """
         return f"""
-                 student : {self.student:^10}
-                 vak     : {self.vak:^16}
-                 datum   :{self.datum:^18}
-                 cijfer  :{self.cijfer:^12}
-                 """
-
-
-def main():
-    """
-    call class and print properties
-    """
-    try:
-        t = Tentamen('Luka', 'database02', '24-11-2022', 7.5)
-        students = t.property()
-        print(students)
-    finally:
-        print('Script finished')
-
-
-if __name__ == '__main__':
-    """
-    Leave system after running script
-    """
-    sys.exit(main())
+            student : {self.student:5}
+            vak : {self.vak}
+            datum : {self.datum}
+            cijfer : {self.cijfer:1}
+            """

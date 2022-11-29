@@ -17,43 +17,52 @@ class Connection:
     """
     Class that prints exam information of a student
     """
-    def __init__(self):
-        pass
+
+    def __init__(self, student=str):
+        self.student = student
+        self.con = None
+        self.cursor = None
+        self.names = []
+        self.exams = set()
 
     def connector(self):
         """
-        Method enables password authentication to login into the database.
-        If authentication goes wrong an error will be returned and the user has to retry
-        inserting its loging information into the database.
+        Method for connecting to database
         """
-        if self.args.password:
-            password = getpass()
-            # Connect to MariaDB Platform
-            try:
-                self.conn = mysql.connector.connect(
-                    user=self.args.us,
-                    host="mariadb.bin.bioinf.nl",
-                    database=self.args.db,
-                    password=password
-                )
-            except mysql.connector.Error as error:
-                print(f"Error connecting to MariaDB Platform: {error}")
-                sys.exit(1)
+        try:
+            self.con = mysql.connector.connect(option_files='lt.my.cnf')
+            self.cursor = self.con.cursor()
+        except mysql.connector.Error as error:
+            print(f"Error connecting to MariaDB Platform: {error}")
+            sys.exit(1)
 
-    def get_connection(self):
+    def fetch(self):
         """
-        Method returns connection to become available in other classes
+        Create list consisting of student names
         """
-        return self.conn
+        self.cursor.execute("SELECT naam FROM studenten")
+        mystudents = self.cursor.fetchall()
+        for x in mystudents:
+            self.names.append("".join(x))
+        return self.names
 
-def main():
-    """
-    call class and print properties
-    """
+    def results(self):
+        """
+        Get results of exams made by student X, given as variable to function call
+        """
+        for name in self.names:
+            if name == self.student:
+                self.cursor.execute(f"select s.naam, c.naam, ex_datum, cijfer from examens e join cursussen c on"
+                                    f" c.cur_id = e.cur_id join studenten s on s.stud_id = e.stud_id"
+                                    f" where s.naam = '{name}';")
+                myresult = self.cursor.fetchall()
+                for exam in myresult:
+                    self.exams.add(exam)
+        return self.exams
 
+    def close(self):
+        """
+        Close connection to sql database
+        """
+        self.con.close()
 
-
-if __name__ == '__main__':
-    """
-    Leave system after running script
-    """
